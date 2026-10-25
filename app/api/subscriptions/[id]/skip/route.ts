@@ -19,6 +19,7 @@ import {
   SubscriptionFrequency,
 } from '@/lib/subscriptions';
 import { formatDate } from "@/lib/utils";
+import { getSubscriptionPeriodEnd } from '../../stripeSubscriptionPeriod';
 
 export const dynamic = 'force-dynamic'
 
@@ -88,8 +89,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       const stripeSubscription = await getStripe().subscriptions.retrieve(
         subscription.stripeSubscriptionId
       );
-      const currentPeriodEnd = stripeSubscription.current_period_end
-        ? new Date(stripeSubscription.current_period_end * 1000)
+      const currentPeriodEnd = (getSubscriptionPeriodEnd(stripeSubscription))
+        ? new Date((getSubscriptionPeriodEnd(stripeSubscription)) * 1000)
         : subscription.nextDeliveryDate;
 
       // Skip one cycle by pausing collection until one period past current period end.

@@ -294,7 +294,7 @@ export async function POST(request: Request) {
         mode: 'payment',
         line_items: lineItems,
         discounts: stripeCouponId ? [{ coupon: stripeCouponId }] : undefined,
-        payment_method_types: ['card'],
+        allowed_payment_method_types: ['card'],
         payment_method_options: {
           card: {
             request_three_d_secure: 'automatic',
