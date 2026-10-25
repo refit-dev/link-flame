@@ -16,6 +16,7 @@ import {
   type SubscriptionInvoiceContext,
 } from '@/lib/stripe-subscription';
 import { resolveWebhookSecret } from '@/lib/stripe-webhook-secret';
+import { getSubscriptionPeriodEnd, getInvoiceSubscription } from '../stripeSubscriptionPeriod';
 
 export const dynamic = 'force-dynamic';
 
@@ -94,9 +95,9 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       paymentFailedAt: null,
     };
 
-    if (stripeSubscription.current_period_end) {
+    if ((getSubscriptionPeriodEnd(stripeSubscription))) {
       subscriptionUpdateData.nextDeliveryDate = new Date(
-        stripeSubscription.current_period_end * 1000
+        (getSubscriptionPeriodEnd(stripeSubscription)) * 1000
       );
     }
 
@@ -138,7 +139,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
     return;
   }
 
-  const stripeSubscriptionId = resolveSubscriptionId(invoice.subscription);
+  const stripeSubscriptionId = resolveSubscriptionId((getInvoiceSubscription(invoice)));
   if (!stripeSubscriptionId) {
     return;
   }
@@ -217,7 +218,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
-  const stripeSubscriptionId = resolveSubscriptionId(invoice.subscription);
+  const stripeSubscriptionId = resolveSubscriptionId((getInvoiceSubscription(invoice)));
   if (!stripeSubscriptionId) {
     return;
   }
@@ -330,9 +331,9 @@ async function handleCustomerSubscriptionUpdated(
     stripeStatus: updatedSubscription.status,
   };
 
-  if (updatedSubscription.current_period_end) {
+  if ((getSubscriptionPeriodEnd(updatedSubscription))) {
     updateData.nextDeliveryDate = new Date(
-      updatedSubscription.current_period_end * 1000
+      (getSubscriptionPeriodEnd(updatedSubscription)) * 1000
     );
   }
 
